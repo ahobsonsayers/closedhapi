@@ -8,4 +8,6 @@ RUN bun install --global @twsxtd/hapi@$HAPI_VERSION
 # Copy hapi script
 COPY ./scripts/hapi.sh /hapi.sh
 
+EXPOSE 3006
+
 CMD ["/hapi.sh"]

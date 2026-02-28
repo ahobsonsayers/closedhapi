@@ -6,7 +6,7 @@ services:
       context: .
     restart: unless-stopped
     ports:
-      - 3000:3000
+      - 3006:3006
     volumes:
       - ./data/workspace:/home/opencode/workspace
       - ./data/.config/opencode:/home/opencode/.config/opencode
