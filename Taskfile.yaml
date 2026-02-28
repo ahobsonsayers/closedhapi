@@ -21,4 +21,4 @@ tasks:
 
   connect:
     cmds:
-      - docker exec -it hapi /bin/bash
+      - docker exec -it closedhapi /bin/bash
