@@ -6,7 +6,7 @@ ARG HAPI_VERSION=0.15.3
 RUN bun install --global @twsxtd/hapi@$HAPI_VERSION
 
 # Copy hapi script
-COPY ./scripts/hapi.sh /hapi.sh
+COPY --chown=agent:agent ./scripts/hapi.sh /hapi.sh
 
 EXPOSE 3006
 
