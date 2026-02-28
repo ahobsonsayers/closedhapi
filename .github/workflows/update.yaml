@@ -1,0 +1,100 @@
+name: Update Versions
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    name: Update versions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Get current versions
+        id: get-current-versions
+        run: |
+          OPENCODE_VERSION=$(grep "^FROM arranhs/closedcode:" Dockerfile | cut -d \':\' -f2)
+          HAPI_VERSION=$(grep "^ARG HAPI_VERSION=" Dockerfile | cut -d \'=\' -f2)
+
+          echo "opencode=$OPENCODE_VERSION" >> $GITHUB_OUTPUT
+          echo "hapi=$HAPI_VERSION" >> $GITHUB_OUTPUT
+
+          echo "
+          Current OpenCode Version: $OPENCODE_VERSION
+          Current Hapi Version: $HAPI_VERSION
+          "
+
+      - name: Get latest versions
+        id: get-latest-versions
+        run: |
+          OPENCODE_LATEST=$(
+            curl -s "https://hub.docker.com/v2/repositories/arranhs/closedcode/tags/?page_size=100" |
+            jq -r '.results[] | select(.name != "latest") | .name' |
+            sort -V |
+            tail -n 1
+          )
+
+          HAPI_LATEST=$(npm view @twsxtd/hapi version | tail -n 1)
+
+          echo "opencode=$OPENCODE_LATEST" >> $GITHUB_OUTPUT
+          echo "hapi=$HAPI_LATEST" >> $GITHUB_OUTPUT
+
+          echo "
+          Latest OpenCode Version: $OPENCODE_LATEST
+          Latest Hapi Version: $HAPI_LATEST
+          "
+
+      - name: Compare and update versions
+        id: compare-update
+        run: |
+          NEEDS_UPDATE=false
+          COMMIT_MSG=""
+
+          if [ "$CURRENT_OPENCODE_VERSION" != "$LATEST_OPENCODE_VERSION" ]; then
+            NEEDS_UPDATE=true
+            COMMIT_MSG="update opencode base to $LATEST_OPENCODE_VERSION"
+          fi
+
+          if [ "$CURRENT_HAPI_VERSION" != "$LATEST_HAPI_VERSION" ]; then
+            NEEDS_UPDATE=true
+            if [ -n "$COMMIT_MSG" ]; then
+              COMMIT_MSG="$COMMIT_MSG, "
+            fi
+            COMMIT_MSG="$COMMIT_MSG update hapi to $LATEST_HAPI_VERSION"
+          fi
+
+          echo "needs_update=$NEEDS_UPDATE" >> $GITHUB_OUTPUT
+          echo "commit_msg=$COMMIT_MSG" >> $GITHUB_OUTPUT
+        env:
+          CURRENT_OPENCODE_VERSION: ${{ steps.get-current-versions.outputs.opencode }}
+          CURRENT_HAPI_VERSION: ${{ steps.get-current-versions.outputs.hapi }}
+          LATEST_OPENCODE_VERSION: ${{ steps.get-latest-versions.outputs.opencode }}
+          LATEST_HAPI_VERSION: ${{ steps.get-latest-versions.outputs.hapi }}
+
+      - name: Update Dockerfile
+        if: steps.compare-update.outputs.needs_update == 'true'
+        run: |
+          if [ "${{ steps.get-current-versions.outputs.opencode }}" != "${{ steps.get-latest-versions.outputs.opencode }}" ]; then
+            sed -i "s|^FROM arranhs/closedcode:.*|FROM arranhs/closedcode:${{ steps.get-latest-versions.outputs.opencode }}|" Dockerfile
+          fi
+
+          if [ "${{ steps.get-current-versions.outputs.hapi }}" != "${{ steps.get-latest-versions.outputs.hapi }}" ]; then
+            sed -i "s|^ARG HAPI_VERSION=.*|ARG HAPI_VERSION=${{ steps.get-latest-versions.outputs.hapi }}|" Dockerfile
+          fi
+
+      - name: Commit and push
+        if: steps.compare-update.outputs.needs_update == 'true'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add Dockerfile
+          git commit -m "${{ steps.compare-update.outputs.commit_msg }}"
+          git push
