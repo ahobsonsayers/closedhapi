@@ -8,8 +8,8 @@ services:
     ports:
       - 3006:3006
     volumes:
-      - ./data/workspace:/home/opencode/workspace
-      - ./data/.config/opencode:/home/opencode/.config/opencode
-      - ./data/.local/share/opencode:/home/opencode/.local/share/opencode
-      - ~/.gitconfig:/home/opencode/.gitconfig:ro
-      - ~/.config/gh/hosts.yml:/home/opencode/.config/gh/hosts.yml:ro
+      - ./workspace:/home/agent/workspace # workspace
+      - ~/.config/opencode:/home/agent/.config/opencode # opencode config
+      - ~/.local/share/opencode:/home/agent/.local/share/opencode # opencode data
+      - ~/.gitconfig:/home/agent/.gitconfig # git config
+      - ~/.config/gh:/home/agent/.config/gh # github cli config
