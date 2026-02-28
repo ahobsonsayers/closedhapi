@@ -21,8 +21,8 @@ jobs:
       - name: Get current versions
         id: get-current-versions
         run: |
-          OPENCODE_VERSION=$(grep "^FROM arranhs/closedcode:" Dockerfile | cut -d \':\' -f2)
-          HAPI_VERSION=$(grep "^ARG HAPI_VERSION=" Dockerfile | cut -d \'=\' -f2)
+          OPENCODE_VERSION=$(grep "^FROM arranhs/closedcode:" Dockerfile | cut -d ':' -f2)
+          HAPI_VERSION=$(grep "^ARG HAPI_VERSION=" Dockerfile | cut -d '=' -f2)
 
           echo "opencode=$OPENCODE_VERSION" >> $GITHUB_OUTPUT
           echo "hapi=$HAPI_VERSION" >> $GITHUB_OUTPUT
