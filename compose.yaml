@@ -1,6 +1,6 @@
 services:
-  hapi:
-    container_name: hapi
+  closedhapi:
+    container_name: closedhapi
     image: arranhs/closedhapi:latest
     build:
       context: .
