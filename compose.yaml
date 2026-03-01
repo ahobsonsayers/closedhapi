@@ -13,3 +13,5 @@ services:
       - ~/.local/share/opencode:/home/agent/.local/share/opencode # opencode data
       - ~/.gitconfig:/home/agent/.gitconfig # git config
       - ~/.config/gh:/home/agent/.config/gh # github cli config
+    environment:
+      # - HAPI_LISTEN_PORT=3006
