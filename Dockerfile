@@ -1,4 +1,4 @@
-FROM arranhs/closedcode:1.2.24
+FROM arranhs/closedcode:1.2.25
 
 ARG HAPI_VERSION=0.16.1
 
