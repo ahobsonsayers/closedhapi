@@ -1,6 +1,6 @@
 FROM arranhs/closedcode:1.2.27
 
-ARG HAPI_VERSION=0.16.2
+ARG HAPI_VERSION=0.16.3
 
 # Install hapi
 RUN bun install --global @twsxtd/hapi@$HAPI_VERSION
